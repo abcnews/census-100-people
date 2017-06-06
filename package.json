@@ -1,0 +1,19 @@
+{
+  "name": "census-100-people",
+  "version": "1.0.0",
+  "description": "A basic ABC News story.",
+  "license": "MIT",
+  "private": true,
+  "contributors": [
+    "Simon Elvery <simon@elvery.net>"
+  ],
+  "scripts": {
+    "start": "npm install && aunty serve --debug"
+  },
+  "devDependencies": {
+    "@abcnews/aunty": "2.2.x"
+  },
+  "aunty": {
+    "type": "basic-story"
+  }
+}
