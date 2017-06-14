@@ -1,3 +1,15 @@
-.census-100-people {
-  color: green;
+.Census-100 {
+    position: relative;
+    z-index: 1;
+
+    svg {
+        background: none;
+        width: 100vw;
+        height: 100vh;
+    }
+
+    circle {
+        fill: #000;
+        stroke: 0;
+    }
 }

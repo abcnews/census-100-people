@@ -1,0 +1,58 @@
+[
+  {
+    "measure": "sex", 
+    "comparison": "population", 
+    "group": "male", 
+    "value": 49.0, 
+    "color": null
+  }, 
+  {
+    "measure": "sex", 
+    "comparison": "population", 
+    "group": "female", 
+    "value": 51.0, 
+    "color": null
+  }, 
+  {
+    "measure": "sex", 
+    "comparison": "parliament", 
+    "group": "male", 
+    "value": 67.0, 
+    "color": null
+  }, 
+  {
+    "measure": "sex", 
+    "comparison": "parliament", 
+    "group": "female", 
+    "value": 33.0, 
+    "color": null
+  }, 
+  {
+    "measure": "sex", 
+    "comparison": "teachers", 
+    "group": "male", 
+    "value": 24.0, 
+    "color": null
+  }, 
+  {
+    "measure": "sex", 
+    "comparison": "teachers", 
+    "group": "female", 
+    "value": 76.0, 
+    "color": null
+  }, 
+  {
+    "measure": "sex", 
+    "comparison": "ceos", 
+    "group": "male", 
+    "value": 85.0, 
+    "color": null
+  }, 
+  {
+    "measure": "sex", 
+    "comparison": "ceos", 
+    "group": "female", 
+    "value": 15.0, 
+    "color": null
+  }
+]

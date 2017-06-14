@@ -1,0 +1,10 @@
+measure,comparison,group,value,color
+none,none,all,100,
+sex,population,male,49,
+sex,population,female,51,
+sex,parliament,male,67,
+sex,parliament,female,33,
+sex,teachers,male,24,
+sex,teachers,female,76,
+sex,ceos,male,85,
+sex,ceos,female,15,

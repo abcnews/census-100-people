@@ -14,6 +14,32 @@
     "@abcnews/aunty": "2.2.x"
   },
   "aunty": {
-    "type": "basic-story"
+    "type": "basic-story",
+    "build": {
+      "scripts": {
+        "files": [
+          "index.js",
+          "scrollyteller.js"
+        ]
+      }
+    },
+    "build_debug": {
+      "scripts": {
+        "files": [
+          "index.js",
+          "scrollyteller.js"
+        ]
+      }
+    }
+  },
+  "dependencies": {
+    "bel": "^5.0.0",
+    "d3-force": "^1.0.6",
+    "d3-request": "^1.0.5",
+    "d3-selection": "^1.1.0",
+    "narricle": "git+ssh://git@stash.abc-dev.net.au:7999/news/narricle.git",
+    "power-ranger": "^1.1.0",
+    "promise-polyfill": "^6.0.2",
+    "util-news-selectors": "git+ssh://git@stash.abc-dev.net.au:7999/news/util-news-selectors.git"
   }
 }
