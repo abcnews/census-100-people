@@ -118,7 +118,6 @@ function update(e) {
 
         let groupLabelsEnter = groupLabels.enter().append('g').attr('class', 'group-label');
         groupLabelsEnter.append('text');
-        groupLabelsEnter.append('line');
         groupLabelsEnter.append('path');
 
         groupLabels = groupLabelsEnter.merge(groupLabels);
@@ -150,18 +149,21 @@ function update(e) {
 
         // Position the text
         groupLabels.select('text')
+            .attr('dy', '0.5em')
             .attr('transform', d => `translate(${d.label.x}, ${d.label.y})`);
 
         // Draw the arc
         groupLabels.select('path')
             .attr('d', d => {
-                let arc = path();
-                arc.arc(d.anchor.x, d.anchor.y, d.r, -Math.PI/2-Math.PI/6, -Math.PI/2+Math.PI/6);
-                return arc.toString();
+                let ctx = path();
+                let rad = Math.atan2(d.label.y-d.y, d.label.x-d.x);
+                ctx.arc(d.anchor.x, d.anchor.y, d.r, rad - deg2rad(30), rad + deg2rad(30));
+                let deg = rad * 180/Math.PI;
+
+                ctx.moveTo(d.label.x - d.label.width, d.label.y + d.label.height);
+                ctx.lineTo(d.anchor.x, d.anchor.y)
+                return ctx.toString();
             });
-
-
-        // TODO: Draw line
 
         // Add all the 'people'
         circles = circles.data(nodes)
@@ -177,6 +179,10 @@ function update(e) {
         simulationNodes.nodes(nodes).alpha(1).restart();
 
     });
+}
+
+function deg2rad(deg) {
+    return deg * Math.PI / 180;
 }
 
 function resolveGroupPositions() {
