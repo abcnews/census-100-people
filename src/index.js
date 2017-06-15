@@ -1,31 +1,34 @@
-const placeholder = document.querySelector('[data-census-100-people-root]');
-const dataUrl = placeholder.dataset.data;
-const container = placeholder.parentNode;
 const html = require('bel');
 const d3 = require('d3-selection');
 const request = require('d3-request');
 const force = require('d3-force');
 const ranger = require('power-ranger')
+const Promise = window.Promise || require('promise-polyfill');
+const label = require('./lib/labeler');
+const path = require('d3-path').path;
+
+const placeholder = document.querySelector('[data-census-100-people-root]');
+const dataUrl = placeholder.dataset.data;
+const container = placeholder.parentNode;
 const root = html`<div class="Census-100"></div>`;
-const Promise = Promise || require('promise-polyfill');
 
 container.replaceChild(root, placeholder);
+
 const margin = 10;
+const markRadius = 5;
+const markMargin = 7;
 const rootSelection = d3.select(root);
 const svgSelection = rootSelection.append('svg');
 
+let groups;
+let nodes;
 let currentMeasure = 'none';
 let currentComparison = 'none';
-let circles = svgSelection.selectAll('circle');
-let rects = svgSelection.selectAll('rect');
+let circles = svgSelection.selectAll('circle.population');
+let groupCircles = svgSelection.selectAll('path.group');
+let groupLabels = svgSelection.selectAll('g.group-label');
 let width = parseInt(svgSelection.style('width'));
 let height = parseInt(svgSelection.style('height'));
-
-// let nodes = ranger(100, i => {
-//     return {idx: i, x: width/2, y: height/2};
-// });
-
-// let groups = [{}];
 
 const tick = function() {
     circles
@@ -37,19 +40,20 @@ let simulationGroups = force.forceSimulation()
     .force('gravity', force.forceCenter(width/2, height/2))
     .force('attract', force.forceManyBody().strength(1000).distanceMin(50))
     // TODO: Possibly make repel force accessor contingent on minimum dimention of screen?
-    .force('repel', force.forceManyBody().strength(-1000).distanceMax(Math.min(width, height) - margin))
+    .force('repel', force.forceManyBody().strength(-1000).distanceMax(Math.min(width, height) - margin * 2))
     .stop();
 
 let simulationNodes = force.forceSimulation()
-    .force('x', force.forceX(d => (d.group && d.group.x) ? d.group.x : width/2))
-    .force('y', force.forceY(d => (d.group && d.group.y) ? d.group.y : height/2))
+    .force('x', force.forceX(d => (d.group && d.group.x) ? d.group.x : width/2).strength(0.05))
+    .force('y', force.forceY(d => (d.group && d.group.y) ? d.group.y : height/2).strength(0.05))
     // .force('attract', force.forceManyBody().strength(50).distanceMax(50).distanceMin(10))
     // .force('repel', force.forceManyBody().strength(-100).distanceMax(50).distanceMin(10))
-    .force('collide', force.forceCollide(10).strength(0.2))
+    .force('collide', force.forceCollide(markMargin).strength(0.9))
     .on('tick', tick);
 
 const data = new Promise((resolve, reject) => {
     request.csv(dataUrl, (err, json) => {
+        console.log('request');
         if (err) return reject(err);
         resolve(json);
     });
@@ -61,10 +65,10 @@ update();
 
 function update(e) {
 
-    console.time('event');
-
     currentMeasure = (e) ? e.detail.closestMark.el.dataset.measure : currentMeasure;
     currentComparison = (e) ? e.detail.closestMark.el.dataset.comparison : currentComparison;
+
+    console.time('event');
 
     // Wait until data exists before we actually reaqct to anything here
     data.then((data) => {
@@ -73,40 +77,103 @@ function update(e) {
 
         // New data
         groups = data.filter(d => d.measure === currentMeasure && d.comparison === currentComparison);
-        nodes = groups.reduce((g,d) => g.concat(ranger(d.value, i => {
-            let idx = g.length + i;
-            if (typeof nodes !== 'undefined' && nodes[g.length]) {
-                nodes[idx].group = d;
+
+        groups.forEach(d => {
+
+            // d.x = width/2;
+            // d.y = height/2;
+            //
+            // console.log('d.y || height/2', d.y || height/2);
+
+            // This is a super rough approximation of circle packing algorithm for which there doesn't appear to be a universal formula for all n between 1 and 100.
+            d.r = Math.sqrt((+d.value*(markRadius+markMargin)*35)/Math.PI);
+        });
+
+        nodes = groups.reduce((newNodes, group) => newNodes.concat(ranger(+group.value, i => {
+            let idx = newNodes.length + i;
+
+            if (typeof nodes !== 'undefined' && nodes[idx]) {
+                nodes[idx].group = group;
                 return nodes[idx];
             }
-            return {group: d};
+            return {
+                // x: group.x,
+                // y: group.y,
+                group: group
+            };
         })),[]);
 
         // Calculate group positions
         simulationGroups.nodes(groups).alpha(1);
         resolveGroupPositions();
 
-        // console.log('groups', groups.map(g => [g.x,g.y]));
+        // Labels
 
-        // rects = rects.data(groups);
-        // rects.exit().remove();
-        // rects = rects.enter().append('rect')
-        //     .attr('fill', 'red')
-        //     .attr('stroke', 'none')
-        //     .attr('width', 5)
-        //     .attr('height', 5)
-        // .merge(rects)
-        //     .attr('x', d => d.x)
-        //     .attr('y', d => d.y);
+        // groups.forEach(d => {
+        //     console.log('JSON.parse(JSON.stringify(d))', JSON.parse(JSON.stringify(d)));
+        // });
 
+        groupLabels = groupLabels.data(groups);
+        groupLabels.exit().remove();
+
+        let groupLabelsEnter = groupLabels.enter().append('g').attr('class', 'group-label');
+        groupLabelsEnter.append('text');
+        groupLabelsEnter.append('line');
+        groupLabelsEnter.append('path');
+
+        groupLabels = groupLabelsEnter.merge(groupLabels);
+
+        // Add the text
+        groupLabels.select('text')
+            .text(d => d.group);
+
+        // Setup objects for the label positioner to use
+        groups.forEach(d => {
+            d.label = {x: d.x, y: d.y-d.r-20};
+            d.anchor = {x: d.x, y: d.y, r: d.r + 20};
+        });
+
+        // Measure the text
+        groupLabels.select('text').each(function(d) {
+            let bbox = this.getBBox();
+            d.label.width = bbox.width;
+            d.label.height = bbox.height;
+        });
+
+        // Calculate label positions
+        label()
+            .label(groups.map(d => d.label))
+            .anchor(groups.map(d => d.anchor))
+            .width(width-margin*2)
+            .height(height-margin*2)
+            .start(1000);
+
+        // Position the text
+        groupLabels.select('text')
+            .attr('transform', d => `translate(${d.label.x}, ${d.label.y})`);
+
+        // Draw the arc
+        groupLabels.select('path')
+            .attr('d', d => {
+                let arc = path();
+                arc.arc(d.anchor.x, d.anchor.y, d.r, -Math.PI/2-Math.PI/6, -Math.PI/2+Math.PI/6);
+                return arc.toString();
+            });
+
+
+        // TODO: Draw line
+
+        // Add all the 'people'
         circles = circles.data(nodes)
             .enter().append('circle')
-                .attr('r', 5)
+                .attr('class', 'population')
+                .attr('r', markRadius)
                 .attr('cx', d => d.x || d.group.x)
                 .attr('cy', d => d.y || d.group.y)
             .merge(circles)
                 // .each(d => console.log('d.x', d.x || d.group.x));
 
+        // Position them
         simulationNodes.nodes(nodes).alpha(1).restart();
 
     });
@@ -116,6 +183,11 @@ function resolveGroupPositions() {
     let i = 0;
     while (simulationGroups.alpha() > simulationGroups.alphaMin()) {
         simulationGroups.tick();
+        // Keep it in the bounds.
+        groups.forEach(d => {
+            d.x = Math.min(width-margin*2-d.r, Math.max(margin+d.r, d.x));
+            d.y = Math.min(height-margin*2-d.r, Math.max(margin+d.r, d.y));
+        });
         i++;
     }
 }

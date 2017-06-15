@@ -35,6 +35,7 @@
   "dependencies": {
     "bel": "^5.0.0",
     "d3-force": "^1.0.6",
+    "d3-path": "^1.0.5",
     "d3-request": "^1.0.5",
     "d3-selection": "^1.1.0",
     "narricle": "git+ssh://git@stash.abc-dev.net.au:7999/news/narricle.git",

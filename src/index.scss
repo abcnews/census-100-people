@@ -2,14 +2,30 @@
     position: relative;
     z-index: 1;
 
+    background-color: #3C6998;
+
+
     svg {
         background: none;
         width: 100vw;
         height: 100vh;
     }
 
-    circle {
-        fill: #000;
-        stroke: 0;
+    circle.population {
+        fill: rgba(255,255,255,0.8);
+        stroke-width: 1;
+        stroke: #000;
+    }
+
+    .group-label text {
+        font-size: 15px;
+        fill: #fff;
+        text-anchor: middle;
+    }
+
+    .group-label path {
+        fill: none;
+        stroke: rgba(255,255,255, 0.6);
+        stroke-width: 1;
     }
 }
