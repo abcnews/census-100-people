@@ -36,20 +36,28 @@ const tick = function() {
         .attr("cy", d => Math.max(margin, Math.min(height - margin, d.y)));
 }
 
-let simulationGroups = force.forceSimulation()
-    .force('gravity', force.forceCenter(width/2, height/2))
-    .force('attract', force.forceManyBody().strength(1000).distanceMin(50))
-    // TODO: Possibly make repel force accessor contingent on minimum dimention of screen?
-    .force('repel', force.forceManyBody().strength(-1000).distanceMax(Math.min(width, height) - margin * 2))
-    .stop();
+let simulationNodes;
+let simulationGroups;
 
-let simulationNodes = force.forceSimulation()
-    .force('x', force.forceX(d => (d.group && d.group.x) ? d.group.x : width/2).strength(0.05))
-    .force('y', force.forceY(d => (d.group && d.group.y) ? d.group.y : height/2).strength(0.05))
-    // .force('attract', force.forceManyBody().strength(50).distanceMax(50).distanceMin(10))
-    // .force('repel', force.forceManyBody().strength(-100).distanceMax(50).distanceMin(10))
-    .force('collide', force.forceCollide(markMargin).strength(0.9))
-    .on('tick', tick);
+function initSimulations() {
+    simulationGroups = force.forceSimulation()
+        .force('gravity', force.forceCenter(width/2, height/2))
+        .force('attract', force.forceManyBody().strength(1000).distanceMin(50))
+        // TODO: Possibly make repel force accessor contingent on minimum dimention of screen?
+        .force('repel', force.forceManyBody().strength(-1000).distanceMax(Math.min(width, height) - margin * 2))
+        .stop();
+
+    simulationNodes = force.forceSimulation()
+        .force('x', force.forceX(d => (d.group && d.group.x) ? d.group.x : width/2).strength(0.05))
+        .force('y', force.forceY(d => (d.group && d.group.y) ? d.group.y : height/2).strength(0.05))
+        // .force('attract', force.forceManyBody().strength(50).distanceMax(50).distanceMin(10))
+        // .force('repel', force.forceManyBody().strength(-100).distanceMax(50).distanceMin(10))
+        .force('collide', force.forceCollide(markMargin).strength(0.9))
+        .on('tick', tick);
+}
+
+initSimulations();
+
 
 const data = new Promise((resolve, reject) => {
     request.csv(dataUrl, (err, json) => {
@@ -61,6 +69,12 @@ const data = new Promise((resolve, reject) => {
 
 // console.log('container', container);
 container.addEventListener('mark', update);
+window.addEventListener('resize', function(){
+    width = parseInt(svgSelection.style('width'));
+    height = parseInt(svgSelection.style('height'));
+    initSimulations();
+    update();
+});
 update();
 
 function update(e) {
@@ -79,12 +93,6 @@ function update(e) {
         groups = data.filter(d => d.measure === currentMeasure && d.comparison === currentComparison);
 
         groups.forEach(d => {
-
-            // d.x = width/2;
-            // d.y = height/2;
-            //
-            // console.log('d.y || height/2', d.y || height/2);
-
             // This is a super rough approximation of circle packing algorithm for which there doesn't appear to be a universal formula for all n between 1 and 100.
             d.r = Math.sqrt((+d.value*(markRadius+markMargin)*35)/Math.PI);
         });
@@ -158,8 +166,6 @@ function update(e) {
                 let ctx = path();
                 let rad = Math.atan2(d.label.y-d.y, d.label.x-d.x);
                 ctx.arc(d.anchor.x, d.anchor.y, d.r, rad - deg2rad(30), rad + deg2rad(30));
-                let deg = rad * 180/Math.PI;
-
                 ctx.moveTo((d.r + 10) * Math.cos(rad) + d.x, (d.r + 10) * Math.sin(rad) + d.y);
                 ctx.lineTo((d.r) * Math.cos(rad) + d.x, (d.r) * Math.sin(rad) + d.y)
                 return ctx.toString();
