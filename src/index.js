@@ -160,8 +160,8 @@ function update(e) {
                 ctx.arc(d.anchor.x, d.anchor.y, d.r, rad - deg2rad(30), rad + deg2rad(30));
                 let deg = rad * 180/Math.PI;
 
-                ctx.moveTo(d.label.x - d.label.width, d.label.y + d.label.height);
-                ctx.lineTo(d.anchor.x, d.anchor.y)
+                ctx.moveTo((d.r + 10) * Math.cos(rad) + d.x, (d.r + 10) * Math.sin(rad) + d.y);
+                ctx.lineTo((d.r) * Math.cos(rad) + d.x, (d.r) * Math.sin(rad) + d.y)
                 return ctx.toString();
             });
 
