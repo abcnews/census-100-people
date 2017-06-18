@@ -41,6 +41,7 @@
     "narricle": "git+ssh://git@stash.abc-dev.net.au:7999/news/narricle.git",
     "power-ranger": "^1.1.0",
     "promise-polyfill": "^6.0.2",
-    "util-news-selectors": "git+ssh://git@stash.abc-dev.net.au:7999/news/util-news-selectors.git"
+    "util-news-selectors": "git+ssh://git@stash.abc-dev.net.au:7999/news/util-news-selectors.git",
+    "util-url2cmid": "git+ssh://git@stash.abc-dev.net.au:7999/news/util-url2cmid.git"
   }
 }
