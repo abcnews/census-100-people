@@ -85,7 +85,11 @@ function update(e) {
     console.time('event');
 
     // Wait until data exists before we actually reaqct to anything here
-    data.then((data) => {
+    data
+    .catch(error => {
+      console.error('Could not load data', error);
+    })
+    .then((data) => {
 
         console.timeEnd('event');
 
