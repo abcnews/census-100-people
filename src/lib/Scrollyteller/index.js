@@ -56,22 +56,45 @@ function Scrollyteller({
       const isFixed = !isBeyond && rect.top <= 0;
 
       // TODO: This might need to be done differently for performance.
-      const closestMark = marks.reduce((closest, m) => {
-          let distance = Math.abs(m.target.getBoundingClientRect().top - viewport.height/2);
-          if (!closest || closest.distance > distance) {
-              return {
-                  distance,
-                  el: m.target
-              };
-          }
-          return closest;
-      }, null);
+    //   const closestMark = marks.reduce((closest, m) => {
+    //       let distance = Math.abs(m.target.getBoundingClientRect().top - viewport.height / 2);
+    //       if (!closest || closest.distance > distance) {
+    //           return {
+    //               distance,
+    //               el: m.target
+    //           };
+    //       }
+    //       return closest;
+    //   }, null);
+
+
+        
+        const closestMark = marks.reduce((closest, m) => {
+
+            let distance = Math.abs(m.target.getBoundingClientRect().top);
+
+            if (!closest || closest.distance > distance) {
+                return {
+                    distance,
+                    el: m.target
+                };
+            }
+            return closest;
+        }, null);
+
+        
+
+
+
 
       if (!previousMark || previousMark.el !== closestMark.el) {
+          
             previousMark = closestMark;
+
+            
             // create and dispatch the event
             let event = new CustomEvent("mark", {detail: {closestMark}, bubbles: true});
-            console.log('fireEvent');
+            console.log(event);
             graphicEl.dispatchEvent(event);
       }
 

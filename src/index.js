@@ -6,6 +6,7 @@ const ranger = require('power-ranger')
 const Promise = window.Promise || require('promise-polyfill');
 const label = require('./lib/labeler');
 const path = require('d3-path').path;
+const scale = require('d3-scale');
 
 const placeholder = document.querySelector('[data-census-100-people-root]');
 const dataUrl = placeholder.dataset.data;
@@ -14,10 +15,14 @@ const root = html`<div class="Census-100"></div>`;
 
 container.replaceChild(root, placeholder);
 
+const color = scale.scaleOrdinal(['#3C6998', '#B05154', '#1B7A7D', '#8D4579', '#97593F', '#605487', '#306C3F']);
+let currentColor = 0;
+
 const margin = 10;
-const markRadius = 5;
+const markRadius = 5; // Circle radius
 const markMargin = 7;
-const rootSelection = d3.select(root);
+const rootSelection = d3.select(root)
+    .style('background-color', color(currentColor));;
 const svgSelection = rootSelection.append('svg');
 
 let groups;
@@ -38,6 +43,9 @@ const tick = function() {
 
 let simulationNodes;
 let simulationGroups;
+
+
+
 
 function initSimulations() {
     simulationGroups = force.forceSimulation()
@@ -69,7 +77,8 @@ const data = new Promise((resolve, reject) => {
 
 // console.log('container', container);
 container.addEventListener('mark', update);
-window.addEventListener('resize', function(){
+
+window.addEventListener('resize', function() {
     width = parseInt(svgSelection.style('width'));
     height = parseInt(svgSelection.style('height'));
     initSimulations();
@@ -82,10 +91,20 @@ function update(e) {
     currentMeasure = (e) ? e.detail.closestMark.el.dataset.measure : currentMeasure;
     currentComparison = (e) ? e.detail.closestMark.el.dataset.comparison : currentComparison;
 
+    currentColor = (e) ? e.detail.closestMark.el.dataset.idx - 1 : currentColor;
+
+    rootSelection.style('background-color', color(currentColor));
+
+    console.log(currentColor);
+
     console.time('event');
 
-    // Wait until data exists before we actually reaqct to anything here
-    data.then((data) => {
+    // Wait until data exists before we actually react to anything here
+    data
+    .catch(error => {
+      console.error('Could not load data', error);
+    })
+    .then((data) => {
 
         console.timeEnd('event');
 
@@ -105,8 +124,9 @@ function update(e) {
                 return nodes[idx];
             }
             return {
-                // x: group.x,
-                // y: group.y,
+                // Add random entry point to this or something
+                x: 500, //group.x,
+                y: 500, //group.y,
                 group: group
             };
         })),[]);
