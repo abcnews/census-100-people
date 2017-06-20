@@ -88,7 +88,6 @@ update();
 
 function update(e) {
 
-
     currentMeasure = (e) ? e.detail.closestMark.el.dataset.measure : currentMeasure;
     currentComparison = (e) ? e.detail.closestMark.el.dataset.comparison : currentComparison;
 
