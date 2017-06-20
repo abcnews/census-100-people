@@ -3,6 +3,7 @@
     z-index: 1;
 
     background-color: #3C6998;
+    transition: background 0.4s;
 
 
     svg {
@@ -13,7 +14,7 @@
 
     circle.population {
         fill: rgba(255,255,255,0.8);
-        stroke-width: 1;
+        stroke-width: 0;
         stroke: #000;
     }
 

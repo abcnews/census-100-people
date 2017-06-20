@@ -71,7 +71,7 @@ function Scrollyteller({
             previousMark = closestMark;
             // create and dispatch the event
             let event = new CustomEvent("mark", {detail: {closestMark}, bubbles: true});
-            console.log('fireEvent');
+            console.log(event);
             graphicEl.dispatchEvent(event);
       }
 
