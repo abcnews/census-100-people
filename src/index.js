@@ -15,10 +15,15 @@ const root = html`<div class="Census-100"></div>`;
 
 container.replaceChild(root, placeholder);
 
+const color = scale.scaleOrdinal(scale.schemeCategory10); // Predefined D3 colour set
+let currentColor = 0;
+let previousSection;
+
 const margin = 10;
 const markRadius = 5; // Circle radius
 const markMargin = 7;
-const rootSelection = d3.select(root);
+const rootSelection = d3.select(root)
+    .style('background-color', color(currentColor));;
 const svgSelection = rootSelection.append('svg');
 
 let groups;
@@ -39,9 +44,6 @@ const tick = function() {
 
 let simulationNodes;
 let simulationGroups;
-
-const color = scale.scaleOrdinal(scale.schemeCategory10); // Predefined D3 colour set
-currentColor = 0;
 
 
 
@@ -87,11 +89,15 @@ update();
 
 function update(e) {
 
-    rootSelection.style('background-color', color(currentColor));
-    currentColor++;
 
     currentMeasure = (e) ? e.detail.closestMark.el.dataset.measure : currentMeasure;
     currentComparison = (e) ? e.detail.closestMark.el.dataset.comparison : currentComparison;
+
+    currentColor = (e) ? e.detail.closestMark.el.dataset.idx - 1 : currentColor;
+
+    rootSelection.style('background-color', color(currentColor));
+
+    console.log(currentColor);
 
     console.time('event');
 
