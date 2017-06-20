@@ -15,9 +15,8 @@ const root = html`<div class="Census-100"></div>`;
 
 container.replaceChild(root, placeholder);
 
-const color = scale.scaleOrdinal(scale.schemeCategory10); // Predefined D3 colour set
+const color = scale.scaleOrdinal(['#3C6998', '#B05154', '#1B7A7D', '#8D4579', '#97593F', '#605487', '#306C3F']);
 let currentColor = 0;
-let previousSection;
 
 const margin = 10;
 const markRadius = 5; // Circle radius
