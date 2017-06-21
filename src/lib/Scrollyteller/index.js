@@ -56,45 +56,29 @@ function Scrollyteller({
       const isFixed = !isBeyond && rect.top <= 0;
 
       // TODO: This might need to be done differently for performance.
-    //   const closestMark = marks.reduce((closest, m) => {
-    //       let distance = Math.abs(m.target.getBoundingClientRect().top - viewport.height / 2);
-    //       if (!closest || closest.distance > distance) {
-    //           return {
-    //               distance,
-    //               el: m.target
-    //           };
-    //       }
-    //       return closest;
-    //   }, null);
+      // Default to the first mark.
+      let closestMark = { el: marks[0].target };
 
+      // Make a list of all the marks we've seen (marks that are visible above
+      // the fold)
+      const seenMarks = marks.filter((m) => {
+        const theFold = viewport.height;
+        const distanceBelowFold = m.target.getBoundingClientRect().top - theFold;
+        return distanceBelowFold < 0;
+      });
 
-        
-        const closestMark = marks.reduce((closest, m) => {
-
-            let distance = Math.abs(m.target.getBoundingClientRect().top);
-
-            if (!closest || closest.distance > distance) {
-                return {
-                    distance,
-                    el: m.target
-                };
-            }
-            return closest;
-        }, null);
-
-        
-
-
-
+      // If we've seen marks, the last one we've seen is the one we want to show.
+      if(seenMarks.length){
+        closestMark = { el: seenMarks.pop().target };
+      }
 
       if (!previousMark || previousMark.el !== closestMark.el) {
-          
+
             previousMark = closestMark;
 
-            
+
             // create and dispatch the event
             let event = new CustomEvent("mark", {detail: {closestMark}, bubbles: true});
-            console.log(event);
             graphicEl.dispatchEvent(event);
       }
 
@@ -159,7 +143,10 @@ function transformSection(section) {
     const marks = parseMarks(section.betweenNodes, 'mark');
     const nodes = [].concat(section.betweenNodes);
 
-    const config = nodes.filter(el => !(el.nodeName === 'A' && el.name.match(/^mark/))).reduce(function (config, node) {
+    const config = nodes
+      .filter(el => !(el.nodeName === 'A' && el.name.match(/^mark/)))
+      .reduce(function (config, node) {
+        if(node.nodeName === '#text') return config;
 
         // Filter out all the mark nodes
         if (marks.map(m => m.anchor).indexOf(node) > -1) {
