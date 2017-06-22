@@ -1,8 +1,8 @@
 const html = require('bel');
-const jankdefer = require('jankdefer');
 const d3 = require('d3-selection');
 const request = require('d3-request');
 const force = require('d3-force');
+const jankdefer = require('jankdefer');
 const label = require('./lib/labeler');
 const path = require('d3-path').path;
 const Promise = window.Promise || require('promise-polyfill');
