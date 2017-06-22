@@ -15,6 +15,7 @@ const root = html`<div class="Census-100"></div>`;
 
 container.replaceChild(root, placeholder);
 
+// Set ABC color scale
 const color = scale.scaleOrdinal(['#3C6998', '#B05154', '#1B7A7D', '#8D4579', '#97593F', '#605487', '#306C3F']);
 let currentColor = 0;
 
@@ -95,8 +96,6 @@ function update(e) {
 
     rootSelection.style('background-color', color(currentColor));
 
-    console.log(currentColor);
-
     console.time('event');
 
     // Wait until data exists before we actually react to anything here
@@ -123,10 +122,17 @@ function update(e) {
                 nodes[idx].group = group;
                 return nodes[idx];
             }
+
+            function getRandomIntInclusive(min, max) {
+              min = Math.ceil(min);
+              max = Math.floor(max);
+              return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
             return {
-                // Add random entry point to this or something
-                x: 500, //group.x,
-                y: 500, //group.y,
+                // Random spread on reload
+                x: getRandomIntInclusive(0, window.innerWidth),
+                y: getRandomIntInclusive(0, window.innerHeight),
                 group: group
             };
         })),[]);
