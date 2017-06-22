@@ -16,10 +16,10 @@ const root = html`<div class="Census-100"></div>`;
 
 container.replaceChild(root, placeholder);
 
-// Set ABC color scale. Match domain with number of colors
+// Set ABC color scale. Matches measure names with colors
 const color = scale.scaleOrdinal(['#3C6998', '#B05154', '#1B7A7D', '#8D4579', '#97593F','#605487', '#306C3F'])
-                   .domain([0, 1, 2, 3, 4, 5, 6]);
-let currentColor = 0;
+                //    .domain([0, 1, 2, 3, 4, 5, 6]);  // Using measure names now as domain
+let currentColor = 'none';
 
 const margin = 10;
 const markRadius = 5; // Circle radius
@@ -77,12 +77,9 @@ function update(e) {
     currentMeasure = (e) ? e.detail.closestMark.el.dataset.measure : currentMeasure;
     currentComparison = (e) ? e.detail.closestMark.el.dataset.comparison : currentComparison;
 
-    // Set color according to section
-    // TODO: Sort according to MEASURE
-    currentColor = (e) ? e.detail.closestMark.el.dataset.measureId - 1 : currentColor;
+    // Set color according to measure
+    currentColor = (e) ? e.detail.closestMark.el.dataset.measure : currentColor;
     rootSelection.style('background-color', color(currentColor));
-
-    console.log(e);
 
     console.time('event');
 

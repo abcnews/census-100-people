@@ -112,7 +112,7 @@ function Scrollyteller({
 function parseMarks(els, prefix) {
     let idx = 0;
     let measureId = 0; // Incremented every new comparison
-    let prevMeasure;
+    let prevMeasure; // Probably not needed now we're using measure names as d3.domain
     let match = new RegExp(`^${prefix}`);
 
     return els.reduce((collection,el) => {
@@ -120,9 +120,7 @@ function parseMarks(els, prefix) {
 
             let next = el.nextSibling;
 
-
             idx++;
-
 
             if (next) {
                 next.dataset.idx = idx;
@@ -136,7 +134,6 @@ function parseMarks(els, prefix) {
                     if (next.dataset.measure !== prevMeasure) measureId++;
 
                     next.dataset.measureId = measureId;
-
                     prevMeasure = next.dataset.measure;
                 }
             } else {
