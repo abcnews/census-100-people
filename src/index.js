@@ -17,13 +17,7 @@ const root = html`<div class="Census-100"></div>`;
 container.replaceChild(root, placeholder);
 
 // Set ABC color scale. Match domain with number of colors
-const color = scale.scaleOrdinal(['#3C6998',
-                                  '#B05154',
-                                  '#1B7A7D',
-                                  '#8D4579',
-                                  '#97593F',
-                                  '#605487',
-                                  '#306C3F'])
+const color = scale.scaleOrdinal(['#3C6998', '#B05154', '#1B7A7D', '#8D4579', '#97593F','#605487', '#306C3F'])
                    .domain([0, 1, 2, 3, 4, 5, 6]);
 let currentColor = 0;
 
