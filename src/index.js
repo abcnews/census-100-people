@@ -77,8 +77,9 @@ function update(e) {
     currentMeasure = (e) ? e.detail.closestMark.el.dataset.measure : currentMeasure;
     currentComparison = (e) ? e.detail.closestMark.el.dataset.comparison : currentComparison;
 
+    // Set color according to section
+    // TODO: Sort according to MEASURE
     currentColor = (e) ? e.detail.closestMark.el.dataset.idx - 1 : currentColor;
-
     rootSelection.style('background-color', color(currentColor));
 
     console.time('event');
