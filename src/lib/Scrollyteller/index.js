@@ -64,7 +64,7 @@ function Scrollyteller({
       const seenMarks = marks.filter((m) => {
         const theFold = viewport.height;
         const distanceBelowFold = m.target.getBoundingClientRect().top - theFold;
-        return distanceBelowFold < -viewport.height/2;
+        return distanceBelowFold < -viewport.height/5;
       });
 
       // If we've seen marks, the last one we've seen is the one we want to show.
