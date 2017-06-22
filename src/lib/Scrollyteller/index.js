@@ -111,6 +111,8 @@ function Scrollyteller({
 // Move marks to next element and remove nodes
 function parseMarks(els, prefix) {
     let idx = 0;
+    let measureId = 0; // Incremented every new comparison
+    let prevMeasure;
     let match = new RegExp(`^${prefix}`);
 
     return els.reduce((collection,el) => {
@@ -118,7 +120,9 @@ function parseMarks(els, prefix) {
 
             let next = el.nextSibling;
 
+
             idx++;
+
 
             if (next) {
                 next.dataset.idx = idx;
@@ -128,13 +132,23 @@ function parseMarks(els, prefix) {
                         let value = d.match(/[0-9a-z]+/)[0];
                         next.dataset[d.match(/[A-Z]+/)[0].toLowerCase()] = isNaN(+value) ? value : +value;
                     });
+
+                    if (next.dataset.measure !== prevMeasure) measureId++;
+
+                    next.dataset.measureId = measureId;
+
+                    prevMeasure = next.dataset.measure;
                 }
             } else {
                 console.warn('Scrollyteller: mark found without a next sibling');
             }
-            collection.push({anchor: el, target: next});
+            collection.push({
+                anchor: el, 
+                target: next
+            });
         }
         return collection;
+
     },[]);
 }
 
