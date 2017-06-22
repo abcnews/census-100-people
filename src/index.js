@@ -79,10 +79,13 @@ function update(e) {
 
     // Set color according to section
     // TODO: Sort according to MEASURE
-    currentColor = (e) ? e.detail.closestMark.el.dataset.idx - 1 : currentColor;
+    currentColor = (e) ? e.detail.closestMark.el.dataset.measureId - 1 : currentColor;
     rootSelection.style('background-color', color(currentColor));
 
+    console.log(e);
+
     console.time('event');
+
 
     // Wait until data exists before we actually react to anything here
     data
@@ -217,22 +220,22 @@ function resolveGroupPositions() {
 }
 
 function init(){
-  initSimulations();
+    initSimulations();
 
-  // console.log('container', container);
-  container.addEventListener('mark', update);
+    // console.log('container', container);
+    container.addEventListener('mark', update);
 
-  window.addEventListener('resize', function() {
-      width = parseInt(svgSelection.style('width'));
-      height = parseInt(svgSelection.style('height'));
-      initSimulations();
-      update();
-  });
-  update();
+    window.addEventListener('resize', function() {
+        width = parseInt(svgSelection.style('width'));
+        height = parseInt(svgSelection.style('height'));
+        initSimulations();
+        update();
+    });
+    update();
 }
 
 jankdefer(init, {
-  timeout: 5000,
-  threshold: 10,
-  debug: true
+    timeout: 5000,
+    threshold: 10,
+    debug: true
 });
