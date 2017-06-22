@@ -41,6 +41,7 @@
     "d3-scale": "^1.0.6",
     "d3-selection": "^1.1.0",
     "fastclick": "^1.0.6",
+    "jankdefer": "github:ashkyd/jankdefer#es5",
     "narricle": "git+ssh://git@stash.abc-dev.net.au:7999/news/narricle.git#bug/dependency-browserify-transforms",
     "object-fit-images": "^3.2.3",
     "power-ranger": "^1.1.0",

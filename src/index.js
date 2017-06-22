@@ -1,11 +1,12 @@
 const html = require('bel');
+const jankdefer = require('jankdefer');
 const d3 = require('d3-selection');
 const request = require('d3-request');
 const force = require('d3-force');
-const ranger = require('power-ranger')
-const Promise = window.Promise || require('promise-polyfill');
 const label = require('./lib/labeler');
 const path = require('d3-path').path;
+const Promise = window.Promise || require('promise-polyfill');
+const ranger = require('power-ranger')
 const scale = require('d3-scale');
 
 const placeholder = document.querySelector('[data-census-100-people-root]');
@@ -34,18 +35,15 @@ let groupCircles = svgSelection.selectAll('path.group');
 let groupLabels = svgSelection.selectAll('g.group-label');
 let width = parseInt(svgSelection.style('width'));
 let height = parseInt(svgSelection.style('height'));
+let simulationNodes;
+let simulationGroups;
 
-const tick = function() {
+const tick = function(options) {
+  const {bar} = (options || {});
     circles
         .attr("cx", d => Math.max(margin, Math.min(width - margin, d.x)))
         .attr("cy", d => Math.max(margin, Math.min(height - margin, d.y)));
 }
-
-let simulationNodes;
-let simulationGroups;
-
-
-
 
 function initSimulations() {
     simulationGroups = force.forceSimulation()
@@ -64,9 +62,6 @@ function initSimulations() {
         .on('tick', tick);
 }
 
-initSimulations();
-
-
 const data = new Promise((resolve, reject) => {
     request.csv(dataUrl, (err, json) => {
         console.log('request');
@@ -74,17 +69,6 @@ const data = new Promise((resolve, reject) => {
         resolve(json);
     });
 });
-
-// console.log('container', container);
-container.addEventListener('mark', update);
-
-window.addEventListener('resize', function() {
-    width = parseInt(svgSelection.style('width'));
-    height = parseInt(svgSelection.style('height'));
-    initSimulations();
-    update();
-});
-update();
 
 function update(e) {
 
@@ -223,3 +207,24 @@ function resolveGroupPositions() {
         i++;
     }
 }
+
+function init(){
+  initSimulations();
+
+  // console.log('container', container);
+  container.addEventListener('mark', update);
+
+  window.addEventListener('resize', function() {
+      width = parseInt(svgSelection.style('width'));
+      height = parseInt(svgSelection.style('height'));
+      initSimulations();
+      update();
+  });
+  update();
+}
+
+jankdefer(init, {
+  timeout: 5000,
+  threshold: 10,
+  debug: true
+});
