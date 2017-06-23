@@ -19,7 +19,7 @@ container.replaceChild(root, placeholder);
 // Set ABC color scale. Matches measure names with colors
 const color = scale.scaleOrdinal(['#3C6998', '#B05154', '#1B7A7D', '#8D4579', '#97593F', '#605487', '#306C3F'])
                 //    .domain([0, 1, 2, 3, 4, 5, 6]);  // Using measure names now as domain
-const paragraphColor = scale.scaleOrdinal(['#29517C', '#8A4042', '#135E60', '#703660', '#71412D', '#483F67', '#22512E']);
+// const paragraphColor = scale.scaleOrdinal(['#29517C', '#8A4042', '#135E60', '#703660', '#71412D', '#483F67', '#22512E']);
 let currentColor = 'none';
 
 const margin = 10;
@@ -67,7 +67,7 @@ function initSimulations() {
 
 const data = new Promise((resolve, reject) => {
     request.csv(dataUrl, (err, json) => {
-        console.log('request');
+        console.log('requesting data');
         if (err) return reject(err);
         resolve(json);
     });
@@ -81,19 +81,6 @@ function update(e) {
     // Set color according to measure
     currentColor = (e) ? e.detail.closestMark.el.dataset.measure : currentColor;
     rootSelection.style('background-color', color(currentColor));
-
-    function hexToRgbA(hex){ // also adds half alpha
-        let c;
-        if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
-            c = hex.substring(1).split('');
-            if(c.length== 3){
-                c= [c[0], c[0], c[1], c[1], c[2], c[2]];
-            }
-            c = '0x'+c.join('');
-            return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+',0.9)';
-        }
-        throw new Error('Bad Hex');
-    }
 
     d3.selectAll('.Scrollyteller-content')
         .style('background-color', hexToRgbA(color(currentColor)));
@@ -126,14 +113,8 @@ function update(e) {
                 return nodes[idx];
             }
 
-            function getRandomIntInclusive(min, max) {
-              min = Math.ceil(min);
-              max = Math.floor(max);
-              return Math.floor(Math.random() * (max - min + 1)) + min;
-            }
-
             return {
-                // Random spread on reload
+                // Random spread of dots on reload
                 x: getRandomIntInclusive(0, window.innerWidth),
                 y: getRandomIntInclusive(0, window.innerHeight),
                 group: group
@@ -165,8 +146,14 @@ function update(e) {
 
         // Setup objects for the label positioner to use
         groups.forEach(d => {
-            d.label = {x: d.x, y: d.y-d.r-20};
-            d.anchor = {x: d.x, y: d.y, r: d.r + 20};
+            d.label = {
+                x: d.x, 
+                y: d.y - d.r - 22};
+            d.anchor = {
+                x: d.x,
+                y: d.y, 
+                r: d.r + 20
+            };
         });
 
         // Measure the text
@@ -248,8 +235,33 @@ function init(){
     update();
 }
 
+function getRandomIntInclusive(min, max) {
+              min = Math.ceil(min);
+              max = Math.floor(max);
+              return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+function hexToRgbA(hex){ // also adds alpha
+        let c;
+        if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
+            c = hex.substring(1).split('');
+            if(c.length== 3){
+                c= [c[0], c[0], c[1], c[1], c[2], c[2]];
+            }
+            c = '0x'+c.join('');
+            return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+',0.85)';
+        }
+        throw new Error('Bad Hex');
+    }
+
+// Stops dots clogging up the system on reload
 jankdefer(init, {
     timeout: 5000,
     threshold: 10,
     debug: true
 });
+
+// Because reloading breaks colors and sections maybe scroll to top on reload
+window.onbeforeunload = function () {
+    window.scrollTo(0, 0);
+}
