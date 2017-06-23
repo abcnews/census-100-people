@@ -82,7 +82,7 @@ function update(e) {
     currentColor = (e) ? e.detail.closestMark.el.dataset.measure : currentColor;
     rootSelection.style('background-color', color(currentColor));
 
-    function hexToRgbA(hex){ // also adds half alpha
+    function hexToRgbA(hex){ // also adds alpha
         let c;
         if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
             c = hex.substring(1).split('');
@@ -90,7 +90,7 @@ function update(e) {
                 c= [c[0], c[0], c[1], c[1], c[2], c[2]];
             }
             c = '0x'+c.join('');
-            return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+',0.9)';
+            return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+',0.85)';
         }
         throw new Error('Bad Hex');
     }
