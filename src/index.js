@@ -51,9 +51,9 @@ const tick = function(options) {
 function initSimulations() {
     simulationGroups = force.forceSimulation()
         .force('gravity', force.forceCenter(width/2, height/2))
-        .force('attract', force.forceManyBody().strength(1500).distanceMin(60))
+        .force('attract', force.forceManyBody().strength(1000).distanceMin(40))
         // TODO: Possibly make repel force accessor contingent on minimum dimention of screen?
-        .force('repel', force.forceManyBody().strength(-1500).distanceMax(Math.min(width, height) - margin * 2))
+        .force('repel', force.forceManyBody().strength(-1000).distanceMax(Math.min(width, height) - margin * 2))
         .stop();
 
     simulationNodes = force.forceSimulation()
@@ -151,8 +151,8 @@ function update(e) {
                 y: d.y - d.r - 22};
             d.anchor = {
                 x: d.x,
-                y: d.y, 
-                // r: d.r + 20 // Label rotation is slightly broken
+                y: d.y,
+                r: d.r + 20 // Label rotation is slightly broken
             };
         });
 
@@ -260,6 +260,6 @@ jankdefer(init, {
 });
 
 // Because reloading breaks colors and sections maybe scroll to top on reload
-window.onbeforeunload = function () {
-    window.scrollTo(0, 0);
-}
+// window.onbeforeunload = function () {
+//     window.scrollTo(0, 0);
+// }
