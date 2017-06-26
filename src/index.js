@@ -72,7 +72,7 @@ function initSimulations() {
 
 const data = new Promise((resolve, reject) => {
     request.csv(dataUrl, (err, json) => {
-        console.log('requesting data');
+        // console.log('requesting data');
         if (err) return reject(err);
         resolve(json);
     });
@@ -90,7 +90,7 @@ function update(e) {
     d3.selectAll('.Scrollyteller-content')
         .style('background-color', hexToRgbA(color(currentColor)));
 
-    console.time('event');
+    // console.time('event');
 
 
     // Wait until data exists before we actually react to anything here
@@ -100,7 +100,7 @@ function update(e) {
     })
     .then((data) => {
 
-        console.timeEnd('event');
+        // console.timeEnd('event');
 
         // New data
         groups = data.filter(d => d.measure === currentMeasure && d.comparison === currentComparison);
