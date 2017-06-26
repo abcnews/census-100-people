@@ -8,6 +8,8 @@ const path = require('d3-path').path;
 const Promise = window.Promise || require('promise-polyfill');
 const ranger = require('power-ranger')
 const scale = require('d3-scale');
+const tspans = require('./lib/tspans');
+const wordwrap = require('./lib/wordwrap');
 
 const placeholder = document.querySelector('[data-census-100-people-root]');
 const dataUrl = placeholder.dataset.data;
@@ -53,7 +55,9 @@ function initSimulations() {
         .force('gravity', force.forceCenter(width/2, height/2))
         .force('attract', force.forceManyBody().strength(1000).distanceMin(10))
         // TODO: Possibly make repel force accessor contingent on minimum dimention of screen?
-        .force('repel', force.forceManyBody().strength(-1000).distanceMax(Math.min(width, height) - margin * 2))
+        .force('repel', force.forceManyBody().strength(-1000).distanceMax(
+            Math.min(width, height) - margin * 2 + 70)
+            )
         .force('collide', force.forceCollide(70))
         .stop();
 
@@ -104,6 +108,9 @@ function update(e) {
         groups.forEach(d => {
             // This is a super rough approximation of circle packing algorithm for which there doesn't appear to be a universal formula for all n between 1 and 100.
             d.r = Math.sqrt((+d.value*(markRadius+markMargin)*35)/Math.PI);
+
+            // For multi-line labels
+            d.groupLines = wordwrap(d.group, 10);
         });
 
         nodes = groups.reduce((newNodes, group) => newNodes.concat(ranger(+group.value, i => {
@@ -142,18 +149,36 @@ function update(e) {
         groupLabels = groupLabelsEnter.merge(groupLabels);
 
         // Add the text
-        groupLabels.select('text')
-            .text(d => d.group);
+        // groupLabels.select('text')
+        //     .text(d => d.group);
+
+        // groupLabels.select('text')
+        //     .call(function (s) {
+        //         return tspans.call(s, function (d) {
+        //             return wordwrap(d.group, 12);
+        //         });
+        //     });
+
+        // tspans.call(groupLabels.select('text'), function (d) {
+        //     return d.groupLines;
+        // });
+
+        groupLabels.selectAll('tspan').remove();
+
+        tspans.call(groupLabels.select('text'), function (d) {
+            return d.groupLines;
+        }); 
 
         // Setup objects for the label positioner to use
         groups.forEach(d => {
             d.label = {
                 x: d.x, 
-                y: d.y - d.r - 22};
+                y: d.y - d.r - 3 - 15 * d.groupLines.length
+            };
             d.anchor = {
                 x: d.x,
                 y: d.y,
-                r: d.r + 20 // Label rotation is slightly broken
+                r: d.r + 20 // Label rotation is still slightly broken
             };
         });
 
@@ -177,7 +202,11 @@ function update(e) {
 
         // Position the text
         groupLabels.select('text')
-            .attr('dy', '0.5em')
+            // .attr('y', d => {
+            //     return `${ 1 - wordwrap(d.group, 10).length}em`
+            // })
+            // .attr('alignment-baseline', 'baseline')
+            // .attr('dy', '0.5em')
             .attr('transform', d => `translate(${d.label.x}, ${d.label.y})`);
 
         // Draw the arc
