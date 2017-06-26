@@ -58,7 +58,7 @@ function initSimulations() {
         .force('repel', force.forceManyBody().strength(-1000).distanceMax(
             Math.min(width, height) - margin * 2 + 100)
             )
-        .force('collide', force.forceCollide(65))
+        .force('collide', force.forceCollide(67))
         .stop();
 
     simulationNodes = force.forceSimulation()
@@ -231,7 +231,7 @@ function update(e) {
                 // .each(d => console.log('d.x', d.x || d.group.x));
 
         // Position them
-        simulationNodes.nodes(nodes).alpha(1.2).restart();
+        simulationNodes.nodes(nodes).alpha(1.3).restart();
 
     });
 }
