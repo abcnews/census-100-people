@@ -51,9 +51,10 @@ const tick = function(options) {
 function initSimulations() {
     simulationGroups = force.forceSimulation()
         .force('gravity', force.forceCenter(width/2, height/2))
-        .force('attract', force.forceManyBody().strength(1000).distanceMin(40))
+        .force('attract', force.forceManyBody().strength(1000).distanceMin(10))
         // TODO: Possibly make repel force accessor contingent on minimum dimention of screen?
         .force('repel', force.forceManyBody().strength(-1000).distanceMax(Math.min(width, height) - margin * 2))
+        .force('collide', force.forceCollide(70))
         .stop();
 
     simulationNodes = force.forceSimulation()
@@ -61,7 +62,7 @@ function initSimulations() {
         .force('y', force.forceY(d => (d.group && d.group.y) ? d.group.y : height/2).strength(0.05))
         // .force('attract', force.forceManyBody().strength(50).distanceMax(50).distanceMin(10))
         // .force('repel', force.forceManyBody().strength(-100).distanceMax(50).distanceMin(10))
-        .force('collide', force.forceCollide(markMargin).strength(0.9))
+        .force('collide', force.forceCollide(markMargin).strength(1))
         .on('tick', tick);
 }
 
@@ -161,15 +162,18 @@ function update(e) {
             let bbox = this.getBBox();
             d.label.width = bbox.width;
             d.label.height = bbox.height;
+            d.label.name = d.group;
         });
 
+        const nsweeps = groups.length * 2;
+
         // Calculate label positions
-        label()
+        var labels = label()
             .label(groups.map(d => d.label))
             .anchor(groups.map(d => d.anchor))
             .width(width-margin*2)
             .height(height-margin*2)
-            .start(1000);
+            .start(nsweeps);
 
         // Position the text
         groupLabels.select('text')
