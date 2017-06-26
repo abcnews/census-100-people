@@ -10,5 +10,5 @@ module.exports = function(lines, lh) {
     .append('tspan')
       .text(function(d) { return d.line; })
       .attr('x', 0)
-      .attr('dy', function(d, i) { return i ? (typeof(lh) == 'function' ? lh(d.parent, d.line, i) : lh) || 15 : 0; });
+      .attr('dy', function(d, i) { return i ? (typeof(lh) == 'function' ? lh(d.parent, d.line, i) : lh) || 18 : 0; });
 }

@@ -173,7 +173,7 @@ function update(e) {
         groups.forEach(d => {
             d.label = {
                 x: d.x, 
-                y: d.y - d.r - 3 - 15 * d.groupLines.length
+                y: d.y - d.r - 3 - 17 * d.groupLines.length
             };
             d.anchor = {
                 x: d.x,
