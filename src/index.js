@@ -163,13 +163,14 @@ function update(e) {
             d.label.height = bbox.height;
         });
 
+
         // Calculate label positions
-        label()
+        var labels = label()
             .label(groups.map(d => d.label))
             .anchor(groups.map(d => d.anchor))
             .width(width-margin*2)
             .height(height-margin*2)
-            .start(1000);
+            .start(10); // Low to avoid too much rotation
 
         // Position the text
         groupLabels.select('text')
