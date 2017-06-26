@@ -8,7 +8,7 @@ module.exports = function() {
       labeler = {};
 
     var max_move = 5.0,
-      max_angle = 0.5,
+      max_angle = 0.2,
       acc = 0;
       rej = 0;
 

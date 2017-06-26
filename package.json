@@ -38,13 +38,15 @@
     "d3-force": "^1.0.6",
     "d3-path": "^1.0.5",
     "d3-request": "^1.0.5",
+    "d3-scale": "^1.0.6",
     "d3-selection": "^1.1.0",
     "fastclick": "^1.0.6",
+    "jankdefer": "github:ashkyd/jankdefer#es5",
     "narricle": "git+ssh://git@stash.abc-dev.net.au:7999/news/narricle.git#bug/dependency-browserify-transforms",
     "object-fit-images": "^3.2.3",
     "power-ranger": "^1.1.0",
     "promise-polyfill": "^6.0.2",
     "util-news-selectors": "git+ssh://git@stash.abc-dev.net.au:7999/news/util-news-selectors.git",
-    "util-url2cmid": "git+ssh://git@stash.abc-dev.net.au:7999/news/util-url2cmid.git#1dc2171be1ed74c9494053abb81ccfcab6940788"
+    "util-url2cmid": "git+ssh://git@stash.abc-dev.net.au:7999/news/util-url2cmid.git"
   }
 }
