@@ -53,12 +53,12 @@ const tick = function(options) {
 function initSimulations() {
     simulationGroups = force.forceSimulation()
         .force('gravity', force.forceCenter(width/2, height/2))
-        .force('attract', force.forceManyBody().strength(1000).distanceMin(10))
+        .force('attract', force.forceManyBody().strength(1005).distanceMin(10))
         // TODO: Possibly make repel force accessor contingent on minimum dimention of screen?
         .force('repel', force.forceManyBody().strength(-1000).distanceMax(
-            Math.min(width, height) - margin * 2 + 70)
+            Math.min(width, height) - margin * 2 + 100)
             )
-        .force('collide', force.forceCollide(70))
+        .force('collide', force.forceCollide(65))
         .stop();
 
     simulationNodes = force.forceSimulation()
@@ -231,7 +231,7 @@ function update(e) {
                 // .each(d => console.log('d.x', d.x || d.group.x));
 
         // Position them
-        simulationNodes.nodes(nodes).alpha(1).restart();
+        simulationNodes.nodes(nodes).alpha(1.2).restart();
 
     });
 }
