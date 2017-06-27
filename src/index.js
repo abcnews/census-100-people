@@ -252,18 +252,20 @@ function resolveGroupPositions() {
 }
 
 function init(){
-    initSimulations();
-
-    // console.log('container', container);
-    container.addEventListener('mark', update);
-
-    window.addEventListener('resize', function() {
-        width = parseInt(svgSelection.style('width'));
-        height = parseInt(svgSelection.style('height'));
+    setTimeout(function () {
         initSimulations();
+
+        // console.log('container', container);
+        container.addEventListener('mark', update);
+
+        window.addEventListener('resize', function() {
+            width = parseInt(svgSelection.style('width'));
+            height = parseInt(svgSelection.style('height'));
+            initSimulations();
+            update();
+        });
         update();
-    });
-    update();
+    }, 200);
 }
 
 function getRandomIntInclusive(min, max) {
