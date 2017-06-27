@@ -123,8 +123,8 @@ function update(e) {
 
             return {
                 // Random spread of dots on reload
-                x: getRandomIntInclusive(0, window.innerWidth),
-                y: getRandomIntInclusive(0, window.innerHeight),
+                x: getRandomInCircle(0, window.innerWidth, 0, window.innerHeight).x,
+                y: getRandomInCircle(0, window.innerWidth, 0, window.innerHeight).y,
                 group: group
             };
         })),[]);
@@ -268,26 +268,74 @@ function init(){
     }, 300);
 }
 
-function getRandomIntInclusive(min, max) {
-              min = Math.ceil(min);
-              max = Math.floor(max);
-              return Math.floor(Math.random() * (max - min + 1)) + min;
-            }
+// function getRandomIntInclusive(min, max) {
+//     min = Math.ceil(min);
+//     max = Math.floor(max);
+//     return Math.floor(Math.random() * (max - min + 1)) + min;
+// }
 
-function hexToRgbA(hex){ // also adds alpha
-        let c;
-        if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
-            c = hex.substring(1).split('');
-            if(c.length== 3){
-                c= [c[0], c[0], c[1], c[1], c[2], c[2]];
-            }
-            c = '0x'+c.join('');
-            return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+',0.85)';
-        }
-        throw new Error('Bad Hex');
+
+// Polyfill for lower than ES2015
+Math.hypot = Math.hypot || function() {
+  var y = 0;
+  var length = arguments.length;
+
+  for (var i = 0; i < length; i++) {
+    if (arguments[i] === Infinity || arguments[i] === -Infinity) {
+      return Infinity;
+    }
+    y += arguments[i] * arguments[i];
+  }
+  return Math.sqrt(y);
+};
+
+
+
+function getRandomInCircle(xMin, xMax, yMin, yMax) {
+    xMin = Math.ceil(xMin);
+    yMin = Math.ceil(yMin);
+    xMax = Math.floor(xMax);
+    yMax = Math.floor(yMax);
+
+    let randomPoint = {
+        x: Math.floor(Math.random() * (xMax - xMin + 1)) + xMin,
+        y: Math.floor(Math.random() * (yMax - yMin + 1)) + yMin
+    };
+
+    let center = {
+        x: (xMin + xMax) / 2,
+        y: (yMin + yMax / 2)
+    };
+
+    let distance = Math.hypot(center.x - randomPoint.x, center.y - randomPoint.y);
+
+    while (distance > (Math.min(xMax - xMin, yMax - yMin)) / 2)  {
+        randomPoint = {
+            x: Math.floor(Math.random() * (xMax - xMin + 1)) + xMin,
+            y: Math.floor(Math.random() * (yMax - yMin + 1)) + yMin
+        };
+        distance = Math.hypot(center.x - randomPoint.x, center.y - randomPoint.y);
     }
 
-// Polyfil for IE etc
+    console.log(distance);
+
+    return randomPoint;
+}
+
+function hexToRgbA(hex){ // also adds alpha
+    let c;
+    if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
+        c = hex.substring(1).split('');
+        if(c.length== 3){
+            c= [c[0], c[0], c[1], c[1], c[2], c[2]];
+        }
+        c = '0x'+c.join('');
+        return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+',0.85)';
+    }
+    throw new Error('Bad Hex');
+}
+
+// Polyfill for IE etc
 if (typeof Object.assign != 'function') {
   Object.assign = function(target, varArgs) { // .length of function is 2
     'use strict';
