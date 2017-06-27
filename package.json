@@ -5,7 +5,8 @@
   "license": "MIT",
   "private": true,
   "contributors": [
-    "Simon Elvery <simon@elvery.net>"
+    "Simon Elvery <simon@elvery.net>",
+    "Joshua Byrd <byrd.joshua@abc.net.au>"
   ],
   "scripts": {
     "start": "npm install && aunty serve --debug"
