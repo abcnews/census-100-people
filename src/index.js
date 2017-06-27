@@ -275,7 +275,7 @@ function init(){
 // }
 
 
-// Polyfil for lower than ES2015
+// Polyfill for lower than ES2015
 Math.hypot = Math.hypot || function() {
   var y = 0;
   var length = arguments.length;
@@ -335,7 +335,7 @@ function hexToRgbA(hex){ // also adds alpha
     throw new Error('Bad Hex');
 }
 
-// Polyfil for IE etc
+// Polyfill for IE etc
 if (typeof Object.assign != 'function') {
   Object.assign = function(target, varArgs) { // .length of function is 2
     'use strict';
