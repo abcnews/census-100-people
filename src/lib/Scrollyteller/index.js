@@ -111,8 +111,6 @@ function Scrollyteller({
 // Move marks to next element and remove nodes
 function parseMarks(els, prefix) {
     let idx = 0;
-    // let measureId = 0; // Incremented every new comparison
-    // let prevMeasure; // Probably not needed now we're using measure names as d3.domain
     let match = new RegExp(`^${prefix}`);
 
     return els.reduce((collection,el) => {
@@ -130,11 +128,6 @@ function parseMarks(els, prefix) {
                         let value = d.match(/[0-9a-z]+/)[0];
                         next.dataset[d.match(/[A-Z]+/)[0].toLowerCase()] = isNaN(+value) ? value : +value;
                     });
-
-                    // if (next.dataset.measure !== prevMeasure) measureId++;
-
-                    // next.dataset.measureId = measureId;
-                    // prevMeasure = next.dataset.measure;
                 }
             } else {
                 console.warn('Scrollyteller: mark found without a next sibling');
