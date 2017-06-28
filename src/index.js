@@ -20,8 +20,6 @@ container.replaceChild(root, placeholder);
 
 // Set ABC color scale. Matches measure names with colors
 const color = scale.scaleOrdinal(['#3C6998', '#B05154', '#1B7A7D', '#8D4579', '#97593F', '#605487', '#306C3F'])
-                //    .domain([0, 1, 2, 3, 4, 5, 6]);  // Using measure names now as domain
-// const paragraphColor = scale.scaleOrdinal(['#29517C', '#8A4042', '#135E60', '#703660', '#71412D', '#483F67', '#22512E']);
 let currentColor = 'none';
 
 const margin = 10;
@@ -51,10 +49,13 @@ const tick = function(options) {
 }
 
 function initSimulations() {
+    // Attempt to fix bug where dots clump on load in production site
+    width = parseInt(svgSelection.style('width'));
+    height = parseInt(svgSelection.style('height'));
+
     simulationGroups = force.forceSimulation()
         .force('gravity', force.forceCenter(width/2, height/2))
         .force('attract', force.forceManyBody().strength(1010).distanceMin(10))
-        // TODO: Possibly make repel force accessor contingent on minimum dimention of screen?
         .force('repel', force.forceManyBody().strength(-1000).distanceMax(
             Math.min(width, height) - margin * 2 + 90)
             )
@@ -64,15 +65,12 @@ function initSimulations() {
     simulationNodes = force.forceSimulation()
         .force('x', force.forceX(d => (d.group && d.group.x) ? d.group.x : width/2).strength(0.05))
         .force('y', force.forceY(d => (d.group && d.group.y) ? d.group.y : height/2).strength(0.05))
-        // .force('attract', force.forceManyBody().strength(50).distanceMax(50).distanceMin(10))
-        // .force('repel', force.forceManyBody().strength(-100).distanceMax(50).distanceMin(10))
         .force('collide', force.forceCollide(markMargin).strength(1))
         .on('tick', tick);
 }
 
 const data = new Promise((resolve, reject) => {
     request.csv(dataUrl, (err, json) => {
-        // console.log('requesting data');
         if (err) return reject(err);
         resolve(json);
     });
@@ -90,8 +88,6 @@ function update(e) {
     d3.selectAll('.Scrollyteller-content')
         .style('background-color', hexToRgbA(color(currentColor)));
 
-    // console.time('event');
-
 
     // Wait until data exists before we actually react to anything here
     data
@@ -99,8 +95,6 @@ function update(e) {
       console.error('Could not load data', error);
     })
     .then((data) => {
-
-        // console.timeEnd('event');
 
         // New data
         groups = data.filter(d => d.measure === currentMeasure && d.comparison === currentComparison);
@@ -133,12 +127,7 @@ function update(e) {
         simulationGroups.nodes(groups).alpha(1);
         resolveGroupPositions();
 
-        // Labels
-
-        // groups.forEach(d => {
-        //     console.log('JSON.parse(JSON.stringify(d))', JSON.parse(JSON.stringify(d)));
-        // });
-
+        // Labels - using tspans to for multi-line labels
         groupLabels = groupLabels.data(groups);
         groupLabels.exit().remove();
 
@@ -147,21 +136,6 @@ function update(e) {
         groupLabelsEnter.append('path');
 
         groupLabels = groupLabelsEnter.merge(groupLabels);
-
-        // Add the text
-        // groupLabels.select('text')
-        //     .text(d => d.group);
-
-        // groupLabels.select('text')
-        //     .call(function (s) {
-        //         return tspans.call(s, function (d) {
-        //             return wordwrap(d.group, 12);
-        //         });
-        //     });
-
-        // tspans.call(groupLabels.select('text'), function (d) {
-        //     return d.groupLines;
-        // });
 
         groupLabels.selectAll('tspan').remove();
 
@@ -202,11 +176,6 @@ function update(e) {
 
         // Position the text
         groupLabels.select('text')
-            // .attr('y', d => {
-            //     return `${ 1 - wordwrap(d.group, 10).length}em`
-            // })
-            // .attr('alignment-baseline', 'baseline')
-            // .attr('dy', '0.5em')
             .attr('transform', d => `translate(${d.label.x}, ${d.label.y})`);
 
         // Draw the arc
@@ -228,7 +197,6 @@ function update(e) {
                 .attr('cx', d => d.x || d.group.x)
                 .attr('cy', d => d.y || d.group.y)
             .merge(circles)
-                // .each(d => console.log('d.x', d.x || d.group.x));
 
         // Position them
         simulationNodes.nodes(nodes).alpha(1.3).restart();
@@ -252,27 +220,18 @@ function resolveGroupPositions() {
 }
 
 function init(){
-    setTimeout(function () {
+    initSimulations();
+
+    container.addEventListener('mark', update);
+
+    window.addEventListener('resize', function() {
+        width = parseInt(svgSelection.style('width'));
+        height = parseInt(svgSelection.style('height'));
         initSimulations();
-
-        // console.log('container', container);
-        container.addEventListener('mark', update);
-
-        window.addEventListener('resize', function() {
-            width = parseInt(svgSelection.style('width'));
-            height = parseInt(svgSelection.style('height'));
-            initSimulations();
-            update();
-        });
         update();
-    }, 300);
+    });
+    update();
 }
-
-// function getRandomIntInclusive(min, max) {
-//     min = Math.ceil(min);
-//     max = Math.floor(max);
-//     return Math.floor(Math.random() * (max - min + 1)) + min;
-// }
 
 
 // Polyfill for lower than ES2015
@@ -289,8 +248,7 @@ Math.hypot = Math.hypot || function() {
   return Math.sqrt(y);
 };
 
-
-
+// For circle initialisation
 function getRandomInCircle(xMin, xMax, yMin, yMax) {
     xMin = Math.ceil(xMin);
     yMin = Math.ceil(yMin);
@@ -316,8 +274,6 @@ function getRandomInCircle(xMin, xMax, yMin, yMax) {
         };
         distance = Math.hypot(center.x - randomPoint.x, center.y - randomPoint.y);
     }
-
-    console.log(distance);
 
     return randomPoint;
 }
@@ -368,8 +324,3 @@ jankdefer(init, {
     threshold: 10,
     debug: false
 });
-
-// Because reloading breaks colors and sections maybe scroll to top on reload
-// window.onbeforeunload = function () {
-//     window.scrollTo(0, 0);
-// }
