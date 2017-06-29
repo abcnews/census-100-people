@@ -126,6 +126,8 @@ function update(e) {
         // Calculate group positions
         simulationGroups.nodes(groups).alpha(1);
         resolveGroupPositions();
+        // Basic fix for labels going off top of screen on small mobiles
+        groups.forEach(d => d.y+=40); // Account for label height
 
         // Labels - using tspans to for multi-line labels
         groupLabels = groupLabels.data(groups);
@@ -152,7 +154,7 @@ function update(e) {
             d.anchor = {
                 x: d.x,
                 y: d.y,
-                r: d.r + 20 // Label rotation is still slightly broken
+                r: d.r + 20 // Label rotation is jittery
             };
         });
 

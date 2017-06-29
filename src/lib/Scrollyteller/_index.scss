@@ -1,5 +1,4 @@
 @import '../../../node_modules/narricle/src/constants';
-@import '../../../node_modules/narricle/src/constants';
 
 .Scrollyteller {
   display: flex;
@@ -18,8 +17,7 @@
     min-height: 56.25vw;
     min-height: calc(var(--root-width) * 9 / 16);
   }
-
-
+  
 }
 
 .Scrollyteller-graphic {
