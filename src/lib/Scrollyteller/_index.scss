@@ -1,4 +1,4 @@
-@import '../../../node_modules/narricle/src/constants';
+@import "../../../node_modules/odyssey/src/constants";
 
 .Scrollyteller {
   display: flex;
@@ -13,28 +13,27 @@
     min-height: 100vh;
   }
 
-  @media #{$mq-landscape} and #{$mq-not-lg}, #{$mq-lg} {
+  @media #{$mq-landscape} and #{$mq-lt-lg}, #{$mq-lg} {
     min-height: 56.25vw;
     min-height: calc(var(--root-width) * 9 / 16);
   }
-  
 }
 
 .Scrollyteller-graphic {
-    width: 100vw;
-    height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+
+  &.is-fixed {
+    position: fixed;
+  }
+
+  &.is-beyond {
     position: absolute;
-    top: 0;
-
-    &.is-fixed {
-        position: fixed;
-    }
-
-    &.is-beyond {
-        position: absolute;
-        bottom: 0;
-        top: initial;
-    }
+    bottom: 0;
+    top: initial;
+  }
 }
 
 .Scrollyteller-content {
@@ -53,9 +52,9 @@
       left: 50%;
       z-index: -1;
       transform: translateX(-50%);
-      width: calc(#{cells(10)} + .75rem);
+      width: calc(#{cells(10)} + 0.75rem);
       height: 100%;
-      background-color: $color-black-transparent-10;
+      background-color: $color-black-transparent-30;
 
       @media #{$mq-md} {
         width: calc(#{cells(10)} + 1.75rem);
@@ -144,5 +143,4 @@
   .is-heading > & {
     width: 100%;
   }
-
 }
