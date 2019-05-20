@@ -47,15 +47,13 @@ let nodes;
 let currentMeasure = "none";
 let currentComparison = "none";
 let circles = svgSelection.selectAll("circle.population");
-let groupCircles = svgSelection.selectAll("path.group");
 let groupLabels = svgSelection.selectAll("g.group-label");
 let width = parseInt(svgSelection.style("width"));
 let height = parseInt(svgSelection.style("height"));
 let simulationNodes;
 let simulationGroups;
 
-const tick = function(options) {
-  const { bar } = options || {};
+const tick = function() {
   circles
     .attr("cx", d => Math.max(margin, Math.min(width - margin, d.x)))
     .attr("cy", d => Math.max(margin, Math.min(height - margin, d.y)));
@@ -240,7 +238,7 @@ function update(e) {
       const nsweeps = groups.length * 2;
 
       // Calculate label positions
-      var labels = label()
+      label()
         .label(groups.map(d => d.label))
         .anchor(groups.map(d => d.anchor))
         .width(width - margin * 2)

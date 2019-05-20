@@ -1,12 +1,8 @@
-// External
 const cn = require("classnames");
 const ns = require("util-news-selectors");
 const html = require("bel");
 const { start, subscribe, enqueue } = require("odyssey/src/app/scheduler");
 const isNaN = Number.isNaN || (x => x !== x);
-
-// Ours
-const { IS_PREVIEW } = require("odyssey/src/constants");
 
 start();
 
