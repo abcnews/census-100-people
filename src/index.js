@@ -137,6 +137,20 @@ function update(e) {
         d => d.measure === currentMeasure && d.comparison === currentComparison
       );
 
+      const totalValue = groups.reduce(
+        (total, group) => (total += +group.value),
+        0
+      );
+
+      // Failsafe for bad data
+      if (totalValue !== 100) {
+        console.error(
+          `Group error: total value is ${totalValue}, it should be 100`,
+          groups
+        );
+        return;
+      }
+
       groups.forEach(d => {
         // This is a super rough approximation of circle packing algorithm for which there doesn't appear to be a universal formula for all n between 1 and 100.
         d.r = Math.sqrt((+d.value * (markRadius + markMargin) * 35) / Math.PI);
