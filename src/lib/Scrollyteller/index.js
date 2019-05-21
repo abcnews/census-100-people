@@ -69,16 +69,16 @@ function Scrollyteller({ marks, graphicEl, alignment, contentEls = [] }) {
     if (seenMarks.length) {
       closestMark = { el: seenMarks.pop().target };
     }
-
     if (!previousMark || previousMark.el !== closestMark.el) {
       previousMark = closestMark;
 
       // create and dispatch the event
-      let event = new CustomEvent("mark", {
+      const ev = new CustomEvent("mark", {
         detail: { closestMark },
         bubbles: true
       });
-      graphicEl.dispatchEvent(event);
+
+      graphicEl.dispatchEvent(ev);
     }
 
     mutate({

@@ -5,7 +5,6 @@ const force = require("d3-force");
 const jankdefer = require("jankdefer");
 const label = require("./lib/labeler");
 const path = require("d3-path").path;
-const Promise = window.Promise || require("promise-polyfill");
 const ranger = require("power-ranger");
 const scale = require("d3-scale");
 const tspans = require("./lib/tspans");
@@ -23,7 +22,7 @@ const root = html`
 container.replaceChild(root, placeholder);
 
 // Set ABC color scale. Matches measure names with colors
-const color = scale.scaleOrdinal([
+const defaultColors = [
   "#3C6998",
   "#B05154",
   "#1B7A7D",
@@ -31,7 +30,17 @@ const color = scale.scaleOrdinal([
   "#97593F",
   "#605487",
   "#306C3F"
-]);
+];
+
+const colorMeta = document.querySelector("meta[name=bg-colours]");
+const color = scale.scaleOrdinal(
+  colorMeta ? colorMeta.content.split(",") : defaultColors
+);
+
+const colorPropertyMeta = document.querySelector(
+  "meta[name=bg-colour-property]"
+);
+
 let currentColor = "none";
 
 const margin = 10;
@@ -116,7 +125,12 @@ function update(e) {
     : currentComparison;
 
   // Set color according to measure
-  currentColor = e ? e.detail.closestMark.el.dataset.measure : currentColor;
+  currentColor = e
+    ? e.detail.closestMark.el.dataset[
+        colorPropertyMeta ? colorPropertyMeta.content : "measure"
+      ]
+    : currentColor;
+
   rootSelection.style("background-color", color(currentColor));
 
   d3.selectAll(".Scrollyteller-content").style(
@@ -409,6 +423,7 @@ if (typeof Object.assign != "function") {
 }
 
 // Stops dots clogging up the system on reload
+
 jankdefer(init, {
   timeout: 5000,
   threshold: 10,
