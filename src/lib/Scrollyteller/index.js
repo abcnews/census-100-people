@@ -1,185 +1,189 @@
-// External
-const cn = require('classnames');
-const ns = require('util-news-selectors');
-const html = require('bel');
-const url2cmid = require('util-url2cmid');
-const {start, subscribe} = require('narricle/src/app/loop');
+const cn = require("classnames");
+const ns = require("util-news-selectors");
+const html = require("bel");
+const { start, subscribe, enqueue } = require("odyssey/src/app/scheduler");
 const isNaN = Number.isNaN || (x => x !== x);
-
-// Ours
-const {IS_PREVIEW} = require('narricle/src/constants');
-const {before, detach, isElement, select, trim} = require('narricle/src/utils');
-const ALIGNMENT_PATTERN = /(left|right)/;
 
 start();
 
-function Scrollyteller({
-    marks,
-    graphicEl,
-    alignment,
-    contentEls = []
-}) {
+function Scrollyteller({ marks, graphicEl, alignment, contentEls = [] }) {
+  let previousMark;
 
-    let previousMark;
+  const className = cn(
+    "Scrollyteller",
+    "is-richtext",
+    "is-piecemeal",
+    {
+      [`is-${alignment}`]: alignment
+    },
+    "u-full"
+  );
 
-    const className = cn('Scrollyteller', 'is-richtext', 'is-piecemeal', {
-        [`is-${alignment}`]: alignment
-    }, 'u-full');
+  const graphicClassName = cn("Scrollyteller-graphic");
 
-    const graphicClassName = cn('Scrollyteller-graphic');
+  const contentClassName = cn(
+    "Scrollyteller-content",
+    "u-layout",
+    "u-richtext-invert"
+  );
 
-    const contentClassName = cn('Scrollyteller-content', 'u-layout', 'u-richtext-invert');
+  const graphicContainerEl = graphicEl
+    ? html`
+        <div class="${graphicClassName}">${graphicEl}</div>
+      `
+    : null;
 
-    const graphicContainerEl = graphicEl ? html`
-        <div class="${graphicClassName}">
-          ${graphicEl}
-        </div>
-    ` : null;
+  const scrollyEl = html`
+    <div class="${className}">
+      ${graphicContainerEl}
+      ${contentEls.map(
+        contentEl => html`
+          <div class="${contentClassName}">${contentEl}</div>
+        `
+      )}
+    </div>
+  `;
 
-    const scrollyEl = html`
-        <div class="${className}">
-            ${graphicContainerEl}
-            ${contentEls.map(contentEl => html`
-            <div class="${contentClassName}">
-                ${contentEl}
-            </div>
-            `)}
-        </div>
-    `;
+  let previousState = {};
 
-    let previousState = {};
-    let state = {};
+  subscribe(measure);
 
-    function measure(viewport) {
-      const rect = scrollyEl.getBoundingClientRect();
-      const isBeyond = viewport.height >= rect.bottom;
-      const isFixed = !isBeyond && rect.top <= 0;
+  function measure(viewport) {
+    const rect = scrollyEl.getBoundingClientRect();
+    const isBeyond = viewport.height >= rect.bottom;
+    const isFixed = !isBeyond && rect.top <= 0;
 
-      // TODO: This might need to be done differently for performance.
-      // Default to the first mark.
-      let closestMark = { el: marks[0].target };
+    // TODO: This might need to be done differently for performance.
+    // Default to the first mark.
+    let closestMark = { el: marks[0].target };
 
-      // Make a list of all the marks we've seen (marks that are visible above
-      // the fold)
-      const seenMarks = marks.filter((m) => {
-        const theFold = viewport.height;
-        const distanceBelowFold = m.target.getBoundingClientRect().top - theFold;
-        return distanceBelowFold < -viewport.height/5;
-      });
-
-      // If we've seen marks, the last one we've seen is the one we want to show.
-      if(seenMarks.length){
-        closestMark = { el: seenMarks.pop().target };
-      }
-
-      if (!previousMark || previousMark.el !== closestMark.el) {
-
-            previousMark = closestMark;
-
-
-            // create and dispatch the event
-            let event = new CustomEvent("mark", {detail: {closestMark}, bubbles: true});
-            graphicEl.dispatchEvent(event);
-      }
-
-      state = {
-        isFixed,
-        isBeyond
-      };
-    }
-
-    function mutate() {
-      if (state.isFixed !== previousState.isFixed) {
-        graphicContainerEl.classList[state.isFixed ? 'add' : 'remove']('is-fixed');
-      }
-
-      if (state.isBeyond !== previousState.isBeyond) {
-        graphicContainerEl.classList[state.isBeyond ? 'add' : 'remove']('is-beyond');
-      }
-
-      previousState = state;
-    }
-
-    subscribe({
-      measure,
-      mutate
+    // Make a list of all the marks we've seen (marks that are visible above
+    // the fold)
+    const seenMarks = marks.filter(m => {
+      const theFold = viewport.height;
+      const distanceBelowFold = m.target.getBoundingClientRect().top - theFold;
+      return distanceBelowFold < -viewport.height / 5;
     });
 
-    return scrollyEl;
-};
+    // If we've seen marks, the last one we've seen is the one we want to show.
+    if (seenMarks.length) {
+      closestMark = { el: seenMarks.pop().target };
+    }
+    if (!previousMark || previousMark.el !== closestMark.el) {
+      previousMark = closestMark;
+
+      // create and dispatch the event
+      const ev = new CustomEvent("mark", {
+        detail: { closestMark },
+        bubbles: true
+      });
+
+      graphicEl.dispatchEvent(ev);
+    }
+
+    mutate({
+      isFixed,
+      isBeyond
+    });
+  }
+
+  function mutate(state) {
+    if (state.isFixed !== previousState.isFixed) {
+      enqueue(() => {
+        graphicContainerEl.classList[state.isFixed ? "add" : "remove"](
+          "is-fixed"
+        );
+      });
+    }
+
+    if (state.isBeyond !== previousState.isBeyond) {
+      enqueue(() => {
+        graphicContainerEl.classList[state.isBeyond ? "add" : "remove"](
+          "is-beyond"
+        );
+      });
+    }
+
+    previousState = state;
+  }
+
+  return scrollyEl;
+}
 
 // Move marks to next element and remove nodes
 function parseMarks(els, prefix) {
-    let idx = 0;
-    let match = new RegExp(`^${prefix}`);
+  let idx = 0;
+  let match = new RegExp(`^${prefix}`);
 
-    return els.reduce((collection,el) => {
-        if (el.nodeName === 'A' && el.name.match(match)) {
+  return els.reduce((collection, el) => {
+    if (el.nodeName === "A" && el.name.match(match)) {
+      let next = el.nextSibling;
 
-            let next = el.nextSibling;
+      idx++;
 
-            idx++;
-
-            if (next) {
-                next.dataset.idx = idx;
-                let data = el.name.match(/[A-Z]+[0-9a-z]+/g);
-                if (data && data.length) {
-                    data.forEach(d => {
-                        let value = d.match(/[0-9a-z]+/)[0];
-                        next.dataset[d.match(/[A-Z]+/)[0].toLowerCase()] = isNaN(+value) ? value : +value;
-                    });
-                }
-            } else {
-                console.warn('Scrollyteller: mark found without a next sibling');
-            }
-            collection.push({
-                anchor: el, 
-                target: next
-            });
+      if (next) {
+        next.dataset.idx = idx;
+        let data = el.name.match(/[A-Z]+[0-9a-z]+/g);
+        if (data && data.length) {
+          data.forEach(d => {
+            let value = d.match(/[0-9a-z]+/)[0];
+            next.dataset[d.match(/[A-Z]+/)[0].toLowerCase()] = isNaN(+value)
+              ? value
+              : +value;
+          });
         }
-        return collection;
-
-    },[]);
+      } else {
+        console.warn("Scrollyteller: mark found without a next sibling");
+      }
+      collection.push({
+        anchor: el,
+        target: next
+      });
+    }
+    return collection;
+  }, []);
 }
 
 function transformSection(section) {
-    const [, alignment] = section.suffix.match(ALIGNMENT_PATTERN) || [];
-    const marks = parseMarks(section.betweenNodes, 'mark');
-    const nodes = [].concat(section.betweenNodes);
+  const marks = parseMarks(section.betweenNodes, "mark");
+  const nodes = [].concat(section.betweenNodes);
 
-    const config = nodes
-      .filter(el => !(el.nodeName === 'A' && el.name.match(/^mark/)))
-      .reduce(function (config, node) {
-        if(node.nodeName === '#text') return config;
+  const config = nodes
+    .filter(el => !(el.nodeName === "A" && el.name.match(/^mark/)))
+    .reduce(
+      function(config, node) {
+        if (node.nodeName === "#text") return config;
 
         // Filter out all the mark nodes
         if (marks.map(m => m.anchor).indexOf(node) > -1) {
-            return config;
+          return config;
         }
 
         // Define the graphic embed element
-        if (!config.graphicEl && node.matches(ns('embed:fragment'))) {
-            config.graphicEl = node;
-            return config;
+        if (!config.graphicEl && node.matches(ns("embed:fragment"))) {
+          config.graphicEl = node;
+          return config;
         }
 
         // Exclude empty elements
-        if (trim(node.textContent).length < 1) {
-            return config;
+        if (node.textContent.trim().length < 1) {
+          return config;
         }
 
         // Assume if it hasn't been excluded above, this node is destined for display
         config.contentEls.push(node);
         return config;
-    }, {
+      },
+      {
         marks,
-        alignment,
+        undefined,
         contentEls: []
-    });
+      }
+    );
 
-    section.betweenNodes = [];
+  section.betweenNodes = [];
 
-    section.replaceWith(Scrollyteller(config));
+  section.substituteWith(Scrollyteller(config));
 }
 
 module.exports = Scrollyteller;
@@ -187,16 +191,20 @@ module.exports.transformSection = transformSection;
 
 // TODO: move polyfills somewhere separate
 
-(function () {
+(function() {
+  if (typeof window.CustomEvent === "function") return false;
 
-  if ( typeof window.CustomEvent === "function" ) return false;
-
-  function CustomEvent ( event, params ) {
+  function CustomEvent(event, params) {
     params = params || { bubbles: false, cancelable: false, detail: undefined };
-    var evt = document.createEvent( 'CustomEvent' );
-    evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
+    var evt = document.createEvent("CustomEvent");
+    evt.initCustomEvent(
+      event,
+      params.bubbles,
+      params.cancelable,
+      params.detail
+    );
     return evt;
-   }
+  }
 
   CustomEvent.prototype = window.Event.prototype;
 
@@ -204,16 +212,16 @@ module.exports.transformSection = transformSection;
 })();
 
 if (!Element.prototype.matches) {
-    Element.prototype.matches =
-        Element.prototype.matchesSelector ||
-        Element.prototype.mozMatchesSelector ||
-        Element.prototype.msMatchesSelector ||
-        Element.prototype.oMatchesSelector ||
-        Element.prototype.webkitMatchesSelector ||
-        function(s) {
-            var matches = (this.document || this.ownerDocument).querySelectorAll(s),
-                i = matches.length;
-            while (--i >= 0 && matches.item(i) !== this) {}
-            return i > -1;
-        };
+  Element.prototype.matches =
+    Element.prototype.matchesSelector ||
+    Element.prototype.mozMatchesSelector ||
+    Element.prototype.msMatchesSelector ||
+    Element.prototype.oMatchesSelector ||
+    Element.prototype.webkitMatchesSelector ||
+    function(s) {
+      var matches = (this.document || this.ownerDocument).querySelectorAll(s),
+        i = matches.length;
+      while (--i >= 0 && matches.item(i) !== this) {}
+      return i > -1;
+    };
 }
